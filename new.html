@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Validation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f4f4f9;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            color: #333;
+        }
+
+        .login {
+            margin-bottom: 30px;
+        }
+
+        label {
+            display: block;
+            text-align: left;
+            margin: 10px 0 5px;
+            font-weight: bold;
+        }
+
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            padding: 10px 20px;
+            color: white;
+            background-color: #007BFF;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .audio-record {
+            margin-top: 20px;
+            border-radius: 50px;
+            background-color: red
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .audio-section {
+            margin-top: 20px;
+        }
+
+        .status {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        h4{
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>User Validation Page</h1>
+
+        <div class="login">
+            <h2>Login</h2>
+            <label for="username">Username</label>
+            <input type="text" id="username" placeholder="Enter your username">
+            <button class="audio-record" onclick="startRecording()">Press to Start Recording</button>
+            </div>
+            <button onclick="login()">Login</button>
+            <h4>Access Denied! Try Again</h4>
+        </div>
+    </div>
+
+    <script>
+        let mediaRecorder;
+        let audioChunks = [];
+
+        function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (username && password) {
+                alert(`Logged in as ${username}`);
+            } else {
+                alert('Please enter valid credentials.');
+            }
+        }
+
+        async function startRecording() {
+            const status = document.getElementById('status');
+            const stopBtn = document.getElementById('stopBtn');
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+
+                mediaRecorder.ondataavailable = event => audioChunks.push(event.data);
+                mediaRecorder.onstop = () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    const audio = new Audio(audioUrl);
+                    audio.play();
+                    status.textContent = 'Recording stopped. Playing audio...';
+                };
+
+                mediaRecorder.start();
+                status.textContent = 'Recording... Press "Stop Recording" to stop.';
+                stopBtn.disabled = false;
+            } catch (error) {
+                status.textContent = 'Error accessing microphone. Please check permissions.';
+            }
+        }
+
+        function stopRecording() {
+            const stopBtn = document.getElementById('stopBtn');
+            mediaRecorder.stop();
+            stopBtn.disabled = true;
+        }
+    </script>
+</body>
+</html>
